@@ -1,4 +1,4 @@
-require 'lib.objects'
+require 'lib.objects.rank'
 require 'items.vranks'
 
 Rank{
@@ -148,7 +148,7 @@ end
 -- == Wild rank
 if G.config.wild_rank then
     local vrank_table = {}
-    for vrank_id,__ in G.VirtualRanks do table.insert(vrank_table, vrank_id) end
+    for vrank_id in pairs(G.VirtualRanks) do table.insert(vrank_table, vrank_id) end
     Rank{
         id = "card_wild_rank",
         name = "Wild Rank",

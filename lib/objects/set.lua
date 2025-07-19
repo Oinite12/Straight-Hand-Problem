@@ -17,9 +17,11 @@ function Set:init(seq)
 end
 
 function Set:size()
-    local set_size = 0
-    for _ in pairs(self.contents) do set_size = set_size + 1 end
-    return set_size
+    -- Permit input of any table, to quickly get size of any table
+    if getmetatable(self) ~= Set then self = {contents=self} end
+    local size = 0
+    for _ in pairs(self.contents) do size = size + 1 end
+    return size
 end
 
 function Set:insert(item)
@@ -41,15 +43,21 @@ function Set:intersection(othr)
     return Set(set_primitive_list)
 end
 
-function Set:to_string()
+function Set:to_string(depth)
+    depth = depth or 0
+    local tab = DBUG.tab
+
     local set_contents = {}
     for k in pairs(self.contents) do
         k = type(k) == "string" and ('"%s"'):format(k) or k
         table.insert(set_contents, tostring(k))
     end
-    return ("Set{%s}"):format(table.concat(set_contents, ", "))
+    
+    local set_contents_stringed = tab(depth) .. table.concat(set_contents, ",\n" .. tab(depth))
+    return ("Set{\n%s\n%s}"):format(set_contents_stringed, tab(depth - 1))
 end
 
+-- == Typical metamethods
 Set.__add = Set.union
 Set.__mul = Set.intersection
 Set.__len = Set.size

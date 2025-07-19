@@ -2,55 +2,6 @@ require 'lib.object_prim'
 require 'lib.global'
 
 G.VirtualRanks = {} -- This is a DAG - directed acyclic graph
-G.Ranks = {}
-
-local function alwaysTrue() return true end
-
----@class Card
-Card = Object:extend()
-function Card:init(rank, suit)
-    self.id = G.get_id()
-    self.rank = rank
-    self.suit = suit or "suit N/A"
-end
-
-function Card:to_string()
-    return ("Card[%s of %s]"):format(self.rank, self.suit)
-end
-Card.__tostring = Card.to_string
-
----@class Rank
-Rank = Object:extend()
-function Rank:init(args)
-    self.id     = args.id
-    self.name   = args.name or ""
-    self.vranks = args.vranks or {}
-
-    if not args.id then error("Rank not given ID") end
-
-    -- args.vranks also takes SEQ of VirtualRank ids
-    -- Default value is function that always returns true
-    for i,vrank_id in ipairs(self.vranks) do
-        self.vranks[vrank_id] = alwaysTrue
-        self.vranks[i] = nil
-    end
-
-    if getmetatable(self) == Rank then
-        G.Ranks[self.id] = self
-    end
-end
-
-function Rank:is_vrank(vrank_id)
-    return self.vranks[vrank_id] and self.vranks[vrank_id]() or false
-end
-
-function Rank:add_vrank(vrank_id, conditional_func)
-    conditional_func = conditional_func or alwaysTrue
-    if type(conditional_func) ~= "function" then
-        error("Conditional function not function")
-    end
-    self.vranks[vrank_id] = conditional_func
-end
 
 ---@class VirtualRank
 VirtualRank = Object:extend()
@@ -72,7 +23,7 @@ function VirtualRank:init(args)
     -- args.descendants also takes SEQ of VirtualRank ids
     -- Default value is function that always returns true
     for i,desc_id in ipairs(self.descendants) do
-        self.descendants[desc_id] = alwaysTrue
+        self.descendants[desc_id] = G.alwaysTrue
         self.descendants[i] = nil
     end
     for desc_id, desc_condition in pairs(self.descendants) do
@@ -80,9 +31,9 @@ function VirtualRank:init(args)
     end
 
     for i,asc_id in ipairs(self.ascendants) do
-        self.ascendants[asc_id] = alwaysTrue
+        self.ascendants[asc_id] = G.alwaysTrue
         self.ascendants[i] = nil
-        self:update_other_vrank(asc_id, "descendants", alwaysTrue)
+        self:update_other_vrank(asc_id, "descendants", G.alwaysTrue)
     end
     for asc_id, asc_condition in pairs(self.ascendants) do
         self:update_other_vrank(asc_id, "descendants", asc_condition)
@@ -94,7 +45,7 @@ function VirtualRank:init(args)
 end
 
 function VirtualRank:add_descendant(desc_id, conditional_func)
-    conditional_func = conditional_func or alwaysTrue
+    conditional_func = conditional_func or G.alwaysTrue
     if type(conditional_func) ~= "function" then
         error("Conditional function not function")
     end
@@ -105,7 +56,7 @@ function VirtualRank:add_descendant(desc_id, conditional_func)
 end
 
 function VirtualRank:add_ascendant(asc_id, conditional_func)
-    conditional_func = conditional_func or alwaysTrue
+    conditional_func = conditional_func or G.alwaysTrue
     if type(conditional_func) ~= "function" then
         error("Conditional function not function")
     end
@@ -135,4 +86,64 @@ end
 
 function VirtualRank:ascendant_check(asc_id)
     return self.ascendants[asc_id] and self.ascendants[asc_id]() or false
+end
+
+-- Required to find straight length
+-- https://en.wikipedia.org/wiki/Longest_path_problem#Acyclic_graphs
+-- Algorithm used: https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
+G.kahn_sorted_vranks = function()
+    local sorted_seq = {}
+    local start_nodes = {}
+
+    local temp_vranks_list = {}
+    for vrank_key, vrank_details in pairs(G.VirtualRanks) do
+        temp_vranks_list[vrank_key] = {
+            descendants = {},
+            ascendants = {}
+        }
+        local v = temp_vranks_list[vrank_key]
+        
+        local has_desc = false
+        for desc_vrank_key, conditional in pairs(vrank_details.descendants) do
+            if conditional() then
+                v.descendants[desc_vrank_key] = true
+                has_desc = true
+            end
+        end
+        local has_asc = false
+        for asc_vrank_key, conditional in pairs(vrank_details.ascendants) do
+            if conditional() then
+                v.ascendants[asc_vrank_key] = true
+                has_asc = true
+            end
+        end
+
+        if not has_desc then
+            if has_asc then
+                start_nodes[vrank_key] = temp_vranks_list[vrank_key]
+            end
+            -- eliminates isolated nodes
+            temp_vranks_list[vrank_key] = nil
+        end
+    end
+
+    while true do
+        if Set.size(start_nodes) == 0 then break end
+        for start_node_key in pairs(start_nodes) do
+            table.insert(sorted_seq, start_node_key)
+
+            local start_vrank = start_nodes[start_node_key]
+            local asc_vranks = start_vrank.ascendants
+            for asc_vrank_key in pairs(asc_vranks) do
+                local asc_vrank = temp_vranks_list[asc_vrank_key]
+                asc_vrank.descendants[start_node_key] = nil
+                if Set.size(asc_vrank.descendants) == 0 then
+                    start_nodes[asc_vrank_key] = temp_vranks_list[asc_vrank_key]
+                end
+            end
+            start_nodes[start_node_key] = nil
+        end
+    end
+
+    return sorted_seq
 end
