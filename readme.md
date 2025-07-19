@@ -1,5 +1,5 @@
 # The Straight-Hand Problem
-This is a prototype for straight hand calculation with support for cards counting as multiple ranks. This premise makes more sense in the context of Balatro, specifically [Steamodded](https://github.com/Steamodded/smods). It is intended to be a solution to a problem brought up in [this issue](https://github.com/Steamodded/smods/issues/449).
+This is a prototype for straight hand calculation with support for cards counting as multiple ranks. This premise makes more sense in the context of Balatro, specifically [Steamodded](https://github.com/Steamodded/smods). It is intended to be a solution to a problem brought up in [this issue](https://github.com/Steamodded/smods/issues/449), though this prototype is independent of Steamodded or Balatro (i.e. it's largely abstract at the moment).
 
 Sorry for the mess; I'll clean up this code after I sleep.
 
