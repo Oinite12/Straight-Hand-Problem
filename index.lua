@@ -48,27 +48,27 @@ local function crawl_vrank_prototypical(vrank_id, vrank_status, proto_container,
     end
 end
 
-local function proto_is_sufficient(proto_straight)
-    -- Insufficient vranks
-    local proto_vrank_count = Set.size(proto_straight)
-    if proto_vrank_count < G.config.straight_length() then return end
-
-    -- Insufficient cards
-    local proto_activating_cards = Set()
-    for ___,vrank_status in pairs(proto_straight) do
-        proto_activating_cards = proto_activating_cards + vrank_status.activating_cards
-    end
-    if #proto_activating_cards < G.config.straight_length() then return end
-
-    return {
-        contents = proto_straight,
-        vrank_count = proto_vrank_count,
-        activating_cards = proto_activating_cards
-    }
-end
-
 local function filter_protos(proto_straight_list)
     local remaining_protos = {}
+
+    local function proto_is_sufficient(proto_straight)
+        -- Insufficient vranks
+        local proto_vrank_count = Set.size(proto_straight)
+        if proto_vrank_count < G.config.straight_length() then return end
+
+        -- Insufficient cards
+        local proto_activating_cards = Set()
+        for ___,vrank_status in pairs(proto_straight) do
+            proto_activating_cards = proto_activating_cards + vrank_status.activating_cards
+        end
+        if #proto_activating_cards < G.config.straight_length() then return end
+
+        return {
+            contents = proto_straight,
+            vrank_count = proto_vrank_count,
+            activating_cards = proto_activating_cards
+        }
+    end
 
     for _,proto_straight in ipairs(proto_straight_list) do
         local proto_analysis = proto_is_sufficient(proto_straight)
@@ -123,6 +123,7 @@ local function calculate_straight(played_cards)
         local current_proto_straight = proto_straights[#proto_straights]
         crawl_vrank_prototypical(vrank_id, vrank_status, current_proto_straight, active_vranks)
     end
+    
     -- Generate "proto-proto-straights"
     for vrank_id,vrank_status in pairs(active_vranks) do
         if vrank_status.not_checked then
@@ -132,7 +133,6 @@ local function calculate_straight(played_cards)
     end
 
     local analyzed_proto_straights = filter_protos(proto_straights)
-
     for __,proto_straight in ipairs(analyzed_proto_straights) do
         proto_straight.max_distance = proto_max_distance(proto_straight)
     end
