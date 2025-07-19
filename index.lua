@@ -8,6 +8,14 @@ local function collect_ranks(played_cards)
     local active_ranks = Set()
     local active_vranks = {}
 
+    local function activate_vrank(vrank_id, card)
+        active_vranks[vrank_id] = active_vranks[vrank_id] or {
+            not_checked = true,
+            activating_cards = Set()
+        }
+        active_vranks[vrank_id].activating_cards:insert(card)
+    end
+
     for __,card in ipairs(played_cards) do
         local rank_id = card.rank
         active_ranks:insert(rank_id)
@@ -15,13 +23,8 @@ local function collect_ranks(played_cards)
         local rank_info = G.Ranks[rank_id]
         local vranks_of_rank = rank_info.vranks
         for vrank_id, vrank_condition in pairs(vranks_of_rank) do
-            if vrank_condition() then
-                active_vranks[vrank_id] = active_vranks[vrank_id] or {
-                    not_checked = true,
-                    activating_cards = Set()
-                }
-                active_vranks[vrank_id].activating_cards:insert(card)
-            end
+            local vrank_is_active = vrank_condition()
+            if vrank_is_active then activate_vrank(vrank_id, card) end
         end
     end
     
@@ -53,26 +56,26 @@ local function filter_protos(proto_straight_list)
 
     local function proto_is_sufficient(proto_straight)
         -- Insufficient vranks
-        local proto_vrank_count = Set.size(proto_straight)
-        if proto_vrank_count < G.config.straight_length() then return end
+        local vrank_count = Set.size(proto_straight)
+        if vrank_count < G.config.straight_length() then return end
 
         -- Insufficient cards
-        local proto_activating_cards = Set()
+        local activating_cards = Set()
         for ___,vrank_status in pairs(proto_straight) do
-            proto_activating_cards = proto_activating_cards + vrank_status.activating_cards
+            activating_cards = activating_cards + vrank_status.activating_cards
         end
-        if #proto_activating_cards < G.config.straight_length() then return end
+        if #activating_cards < G.config.straight_length() then return end
 
         return {
             contents = proto_straight,
-            vrank_count = proto_vrank_count,
-            activating_cards = proto_activating_cards
+            vrank_count = vrank_count,
+            activating_cards = activating_cards
         }
     end
 
     for _,proto_straight in ipairs(proto_straight_list) do
         local proto_analysis = proto_is_sufficient(proto_straight)
-        if proto_analysis then table.insert(remaining_protos, proto_analysis) end
+        if proto_analysis ~= nil then table.insert(remaining_protos, proto_analysis) end
     end
 
     return remaining_protos
