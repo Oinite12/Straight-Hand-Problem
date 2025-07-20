@@ -26,5 +26,5 @@ function unit_test(id, card_list, expected_list)
     local test_status = Set.is_empty(count_cards)
     if type(id) == "number" then id = tostring(id)
     else id = ('"%s"'):format(id) end
-    print(("Test %s %s"):format(id, test_status and "SUCCESS" or "FAIL"))
+    print(("%s Test %s"):format(test_status and "SUCCESS" or "FAIL   ", id))
 end

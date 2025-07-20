@@ -23,6 +23,11 @@ local unit_tests = {
         expect = {"card_A", "card_2", "card_3", "card_4", "card_5"}
     },
     {
+        name = "Two sets of straights",
+        input = {"card_A", "card_2", "card_3", "card_4", "card_5", "card_K", "card_Q", "card_J", "card_10", "card_9"},
+        expect = {"card_A", "card_2", "card_3", "card_4", "card_5", "card_K", "card_Q", "card_J", "card_10", "card_9"},
+    },
+    {
         name = "Four Fingers",
         input = {"card_A", "card_2", "card_3", "card_4"},
         expect = {"card_A", "card_2", "card_3", "card_4"},
