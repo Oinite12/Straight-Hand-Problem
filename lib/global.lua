@@ -11,7 +11,7 @@ function G.get_id()
 end
 
 G.has_mods = {
-    unstable = true,
+    unstable = false,
     showdown = false,
     strangePencil = false
 }

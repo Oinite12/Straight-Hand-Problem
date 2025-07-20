@@ -25,6 +25,12 @@ function Set:size()
     return size
 end
 
+function Set:is_empty()
+    -- this iteration only runs if something is in self
+    for _ in pairs(self) do return false end
+    return true
+end
+
 function Set:insert(item)
     self[item] = true
 end
@@ -57,6 +63,8 @@ function Set:to_string(depth)
     local set_contents_stringed = tab(depth) .. table.concat(set_contents, ",\n" .. tab(depth))
     return ("Set{\n%s\n%s}"):format(set_contents_stringed, tab(depth - 1))
 end
+
+Set.iter = pairs
 
 -- == Typical metamethods
 Set.__add = Set.union
