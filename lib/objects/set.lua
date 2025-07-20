@@ -5,41 +5,42 @@ require 'lib.dbug'
 ---@class Set
 Set = Object:extend()
 function Set:init(seq)
-    self.contents = {}
+    self = {}
     if not seq then return end
+    -- Sequence items into hash keys
     for i,item in ipairs(seq) do
-        self.contents[item] = true
+        self[item] = true
         seq[i] = nil
     end
+    -- Non-object sets
     for k,v in pairs(seq) do
-        if v == true then self.contents[k] = true end
+        if v == true then self[k] = true end
     end
 end
 
+-- Any table can be inputted to get number of defined keys
 function Set:size()
-    -- Permit input of any table, to quickly get size of any table
-    if getmetatable(self) ~= Set then self = {contents=self} end
     local size = 0
-    for _ in pairs(self.contents) do size = size + 1 end
+    for _ in pairs(self) do size = size + 1 end
     return size
 end
 
 function Set:insert(item)
-    self.contents[item] = true
+    self[item] = true
 end
 
 function Set:union(othr)
     if getmetatable(othr) ~= Set then error("Set cannot union with non-set") end
-    local set_primitive_list = {}
-    for k in pairs(self.contents) do set_primitive_list[k] = true end
-    for k in pairs(othr.contents) do set_primitive_list[k] = true end
-    return Set(set_primitive_list)
+    local new_set = Set()
+    for k in pairs(self) do new_set:insert(k) end
+    for k in pairs(othr) do new_set:insert(k) end
+    return new_set
 end
 
 function Set:intersection(othr)
-    if getmetatable(othr) ~= Set then error("Set cannot union with non-set") end
+    if getmetatable(othr) ~= Set then error("Set cannot intersect with non-set") end
     local set_primitive_list = {}
-    for k in pairs(self.contents) do set_primitive_list[k] = othr.contents[k] end
+    for k in pairs(self) do set_primitive_list[k] = othr[k] end
     return Set(set_primitive_list)
 end
 
@@ -48,7 +49,7 @@ function Set:to_string(depth)
     local tab = DBUG.tab
 
     local set_contents = {}
-    for k in pairs(self.contents) do
+    for k in pairs(self) do
         k = type(k) == "string" and ('"%s"'):format(k) or k
         table.insert(set_contents, tostring(k))
     end
