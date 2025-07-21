@@ -1,4 +1,5 @@
 require 'items.ranks'
+require 'items.rank_extension'
 require 'lib.global'
 require 'lib.objects.set'
 require 'lib.objects.card'
