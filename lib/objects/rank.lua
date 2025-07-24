@@ -33,6 +33,9 @@ function Rank:add_vrank(vrank_id, conditional_func)
     if type(conditional_func) ~= "function" then
         error("Conditional function not function")
     end
+
+    if not G.VirtualRanks[vrank_id] then print("WARNING: virtual rank", vrank_id, "is not registered") end
+
     if self.vranks[vrank_id] and self.vranks[vrank_id] ~= G.alwaysTrue then
         self.vranks[vrank_id] = function()
             return self.vranks[vrank_id] and conditional_func
