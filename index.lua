@@ -136,6 +136,12 @@ local unit_tests = {
         expect = {"card_unstable_0", "card_unstable_0_5", "card_unstable_1", "card_unstable_sqrt2", "card_2"},
         environment = function() G.has_mods.unstable = true end
     },
+    {
+        name = "Unstable - Exclude decimal full houses",
+        input = {"card_unstable_0_5", "card_unstable_0_5", "card_unstable_0_5", "card_unstable_sqrt2", "card_unstable_sqrt2"},
+        expect = {},
+        environment = function() G.has_mods.unstable = true end,
+    }
 }
 
 ------------------------
@@ -185,6 +191,7 @@ for name,values in pairs(unit_tests) do
     local test_name = values.name or name
     local test_input = values.input
     local test_expect = values.expect
+    local test_dbug = values.dolog
     if test_expect == "ditto" then test_expect = dupe_table(test_input) end
-    unit_test(test_name, test_input, test_expect)
+    unit_test(test_name, test_input, test_expect, test_dbug)
 end

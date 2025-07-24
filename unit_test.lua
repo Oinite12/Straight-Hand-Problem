@@ -1,7 +1,8 @@
 require 'straight_calculation'
 require 'lib.objects.set'
+require 'lib.dbug'
 
-function unit_test(id, card_list, expected_list)
+function unit_test(id, card_list, expected_list, doDbug)
     for i,rank_key in ipairs(card_list) do
         card_list[i] = Card(rank_key)
     end
@@ -27,4 +28,5 @@ function unit_test(id, card_list, expected_list)
     if type(id) == "number" then id = tostring(id)
     else id = ('"%s"'):format(id) end
     print(("%s Test %s"):format(test_status and "SUCCESS" or "FAIL   ", id))
+    if doDbug then printObj(calculated_straight) end
 end
