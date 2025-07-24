@@ -141,6 +141,30 @@ local unit_tests = {
         input = {"card_unstable_0_5", "card_unstable_0_5", "card_unstable_0_5", "card_unstable_sqrt2", "card_unstable_sqrt2"},
         expect = {},
         environment = function() G.has_mods.unstable = true end,
+    },
+    {
+        name = "Familiar - Smudged Jester - 3 is 8, 6 is 9",
+        input = {"card_3", "card_6", "card_10", "card_J", "card_Q"},
+        expect = "ditto",
+        environment = function() G.has_jokers.j_fam_smudged_jester = true end,
+    },
+    {
+        name = "Familiar - Smudged Jester - K is high A",
+        input = {"card_9", "card_10", "card_J", "card_Q", "card_K"},
+        expect = "ditto",
+        environment = function() G.has_jokers.j_fam_smudged_jester = true end,
+    },
+    {
+        name = "Familiar - Smudged Jester - K is low A",
+        input = {"card_5", "card_4", "card_3", "card_2", "card_K"},
+        expect = "ditto",
+        environment = function() G.has_jokers.j_fam_smudged_jester = true end,
+    },
+    {
+        name = "Familiar - Smudged Jester - K is non-looping A",
+        input = {"card_3", "card_2", "card_K", "card_Q", "card_J"},
+        expect = {},
+        environment = function() G.has_jokers.j_fam_smudged_jester = true end,
     }
 }
 

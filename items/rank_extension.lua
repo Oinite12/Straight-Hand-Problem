@@ -49,4 +49,15 @@ function extend_ranks()
         }
     end]]
 
+    -- == Familiar - Smudged Joker
+    local function has_fam_smudged_jester() return G.has_jokers.j_fam_smudged_jester end
+    G.Ranks.card_3:add_vrank("8", has_fam_smudged_jester)
+    G.Ranks.card_6:add_vrank("9", has_fam_smudged_jester)
+    G.Ranks.card_K:add_vrank("A_low", has_fam_smudged_jester)
+    G.Ranks.card_K:add_vrank("A_high", has_fam_smudged_jester)
+
+    -- == Maximus - Perspective
+    local function has_mxms_perspective() return G.has_jokers.j_mxms_perspective end
+    G.Ranks.card_6:add_vrank("9", has_mxms_perspective)
+    G.Ranks.card_9:add_vrank("6", has_mxms_perspective)
 end
