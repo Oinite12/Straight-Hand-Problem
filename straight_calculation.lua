@@ -59,11 +59,16 @@ local function filter_protos(proto_straight_list)
         local vrank_count = Set.size(proto_straight)
         if vrank_count < G.config.straight_length() then return end
 
-        -- Insufficient cards
+        -- Insufficient cards and ranks
         local activating_cards = Set()
-        for ___,vrank_status in pairs(proto_straight) do
+        local rank_list = Set()
+        for _,vrank_status in pairs(proto_straight) do
             activating_cards = activating_cards + vrank_status.activating_cards
+            for card in vrank_status.activating_cards:iter() do
+                rank_list:insert(card.rank)
+            end
         end
+        if #rank_list < G.config.straight_length() then return end
         if #activating_cards < G.config.straight_length() then return end
 
         return {
